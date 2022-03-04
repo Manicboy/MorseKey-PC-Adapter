@@ -1,4 +1,9 @@
 // ---------------------------------------------------------------------------------------
+// -- INFO
+// ---------------------------------------------------------------------------------------
+// USB Type: Serial + Midi + Audio
+
+// ---------------------------------------------------------------------------------------
 // -- inlcudes
 // ---------------------------------------------------------------------------------------
 #include <Audio.h>
@@ -10,17 +15,13 @@
 // ---------------------------------------------------------------------------------------
 // GUItool: begin automatically generated code
 AudioOutputI2S i2s1;
-AudioAmplifier           amp1;
 AudioSynthWaveformSine oTone;          //xy=284,370
 AudioInputUSB oUsbIn;           //xy=680,372
 AudioOutputUSB oUsbOut;           //xy=680,372
 AudioConnection patchCordLeft(oTone, 0, oUsbOut, 0);
-//AudioConnection patchCordRight(oTone, 0, oUsbOut, 1);
-AudioConnection patchCordRight(oTone, 0, amp1, 1);
+AudioConnection patchCordRight(oTone, 0, oUsbOut, 1);
 AudioConnection patchCordLeftI2S(oTone, 0, i2s1, 0);
-//AudioConnection patchCordRightI2S(oTone, 0, i2s1, 1);
-AudioConnection          patchCord4(amp1, 0, oUsbOut, 1);
-AudioConnection          patchCord5(amp1, 0, i2s1, 1);
+AudioConnection patchCordRightI2S(oTone, 0, i2s1, 1);
 AudioControlSGTL5000 sgtl5000_1;     //xy=314,290
 
 // GUItool: end automatically generated code
@@ -45,7 +46,7 @@ AudioControlSGTL5000 sgtl5000_1;     //xy=314,290
 // ---------------------------------------------------------------------------------------
 #define VOLSTEP 0.1
 #define FREQSTEP 50
-#define LENSTEP 50
+#define LENSTEP 5
 
 int g_iDitLen = 100;
 
@@ -73,7 +74,6 @@ void setLedOff()
 void setToneOff()
 {
   setLedOff();
-  //oTone.phase(PHASE);
   oTone.frequency(g_iFreq);
   oTone.amplitude(0.0);
 }
@@ -81,7 +81,6 @@ void setToneOff()
 void setToneOn()
 {
   setLedOn();
-  //oTone.phase(PHASE);
   oTone.frequency(g_iFreq);
   oTone.amplitude(g_fLvl);
 }
@@ -125,17 +124,17 @@ void setValues()
     g_iFreq += FREQSTEP;
     bChange = true;
   }
-  if ((!digitalRead(PINFREQDN)) && (g_iFreq > 400)) {
+  if ((!digitalRead(PINFREQDN)) && (g_iFreq > 300)) {
     g_iFreq -= FREQSTEP;
     bChange = true;
   }
 
   // -- Dit Length
-  if ((!digitalRead(PINLENUP)) && (g_iDitLen < 800)) {
+  if ((!digitalRead(PINLENUP)) && (g_iDitLen < 300)) {
     g_iDitLen += LENSTEP;
     bChange = true;
   }
-  if ((!digitalRead(PINLENDN)) && (g_iDitLen > 100)) {
+  if ((!digitalRead(PINLENDN)) && (g_iDitLen > 5)) {
     g_iDitLen -= LENSTEP;
     bChange = true;
   }
@@ -157,16 +156,12 @@ void setup()
   sgtl5000_1.enable();
   sgtl5000_1.inputSelect(AUDIO_INPUT_LINEIN);
   sgtl5000_1.volume(0.5);
-
-  amp1.gain(1.0);
   
-  //setToneOff();
-  setToneOn();
+  setToneOff();
 
   pinMode(PINLED, OUTPUT);
   digitalWrite(PINLED, LOW);
-  //digitalWrite(PINLED, HIGH);
-/*
+
   pinMode(PINKEY, INPUT_PULLUP);
   digitalWrite(PINKEY, HIGH);
 
@@ -193,7 +188,7 @@ void setup()
 
   pinMode(PINDAH, INPUT_PULLUP);
   digitalWrite(PINDAH, HIGH);
-*/
+
 }
 
 // ---------------------------------------------------------------------------------------
@@ -220,72 +215,18 @@ void loopStraight()
   }
 }
 
-void loopTest()
-{
-  //return;
-  
-  sendDah();
-  delay(g_iDitLen);
-  sendDah();
-  delay(g_iDitLen);
-  sendDah();
-  delay(3 * g_iDitLen);
-  
-  sendDit();
-  delay(3 * g_iDitLen);
-
-  sendDah();
-  delay(g_iDitLen);
-  sendDah();
-  delay(g_iDitLen);
-  sendDit();
-  delay(g_iDitLen);
-  sendDit();
-  delay(g_iDitLen);
-  sendDit();
-  delay(3 * g_iDitLen);
-  
-  sendDit();
-  delay(g_iDitLen);
-  sendDah();
-  delay(g_iDitLen);
-  sendDit();
-  delay(3 * g_iDitLen);
-  
-  sendDit();
-  delay(3 * g_iDitLen);
-
-  sendDit();
-  delay(g_iDitLen);
-  sendDit();
-  delay(g_iDitLen);
-  sendDit();
-  delay(g_iDitLen);
-  sendDit();
-  delay(7 * g_iDitLen);
-}
 // ---------------------------------------------------------------------------------------
 // -- Main Loop
 // ---------------------------------------------------------------------------------------
 void loop()
 {
-/*  
+  
   if (!digitalRead(PINKEY)) {
     loopStraight();
   }
   else {
     loopPaddle();
   }
-*/
-/*
-  setToneOn();
-  delay(1000);
-  setToneOff();
-  delay(1000);
-*/
-
-  loopTest();
-  delay(3000);
 
   setValues();
 }
